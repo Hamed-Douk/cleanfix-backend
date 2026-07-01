@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 const path = require('path')
 
 const app = express()
-const PORT = 3002
+const PORT = process.env.PORT || 3002
 const SECRET = 'cleanfix_secret_2025'
 
 // Base de données
