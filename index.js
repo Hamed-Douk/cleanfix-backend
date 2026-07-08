@@ -135,7 +135,26 @@ app.get('/api/reservations', async (req, res) => {
   const { rows } = await pool.query('SELECT * FROM reservations ORDER BY created_at DESC')
   res.json(rows)
 })
-
+// Dashboard admin — statistiques
+app.get('/api/admin/stats', async (req, res) => {
+  const reservations = await pool.query('SELECT COUNT(*) as total FROM reservations')
+  const utilisateurs = await pool.query('SELECT COUNT(*) as total FROM utilisateurs')
+  const aujourdhui = await pool.query(`
+    SELECT COUNT(*) as total FROM reservations 
+    WHERE DATE(created_at) = CURRENT_DATE
+  `)
+  const dernieres = await pool.query(`
+    SELECT * FROM reservations 
+    ORDER BY created_at DESC 
+    LIMIT 10
+  `)
+  res.json({
+    total_reservations: parseInt(reservations.rows[0].total),
+    total_utilisateurs: parseInt(utilisateurs.rows[0].total),
+    reservations_aujourdhui: parseInt(aujourdhui.rows[0].total),
+    dernieres_reservations: dernieres.rows
+  })
+})
 app.listen(PORT, () => {
   console.log(`✅ Serveur CleanFix CI démarré sur http://localhost:${PORT}`)
 })
