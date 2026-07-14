@@ -155,6 +155,15 @@ app.get('/api/admin/stats', async (req, res) => {
     dernieres_reservations: dernieres.rows
   })
 })
+// Réservations d'un utilisateur spécifique
+app.get('/api/reservations/user/:id', async (req, res) => {
+  const { id } = req.params
+  const { rows } = await pool.query(
+    'SELECT * FROM reservations WHERE utilisateur_id = $1 ORDER BY created_at DESC',
+    [id]
+  )
+  res.json(rows)
+})
 app.listen(PORT, () => {
   console.log(`✅ Serveur CleanFix CI démarré sur http://localhost:${PORT}`)
 })
