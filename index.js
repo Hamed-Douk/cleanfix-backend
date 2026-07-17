@@ -113,13 +113,13 @@ app.post('/api/connexion', async (req, res) => {
 
 // Créer réservation
 app.post('/api/reservations', async (req, res) => {
-  const { prestation, adresse, date } = req.body
+  const { prestation, adresse, date, utilisateur_id } = req.body
   if (!prestation || !adresse) {
     return res.status(400).json({ erreur: 'Prestation et adresse obligatoires' })
   }
   const { rows } = await pool.query(
-    'INSERT INTO reservations (prestation, adresse, date) VALUES ($1, $2, $3) RETURNING *',
-    [prestation, adresse, date || "Aujourd'hui"]
+    'INSERT INTO reservations (utilisateur_id, prestation, adresse, date) VALUES ($1, $2, $3, $4) RETURNING *',
+[utilisateur_id || null, prestation, adresse, date || "Aujourd'hui"]
   )
   const reservation = {
     ...rows[0],
