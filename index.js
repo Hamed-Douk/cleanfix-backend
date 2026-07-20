@@ -164,6 +164,45 @@ app.get('/api/reservations/user/:id', async (req, res) => {
   )
   res.json(rows)
 })
+// Créer une notation
+app.post('/api/notations', async (req, res) => {
+  const { reservation_id, note, commentaire } = req.body
+  if (!reservation_id || !note) {
+    return res.status(400).json({ erreur: 'Réservation et note obligatoires' })
+  }
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS notations (
+      id SERIAL PRIMARY KEY,
+      reservation_id INTEGER UNIQUE,
+      note INTEGER CHECK (note >= 1 AND note <= 5),
+      commentaire TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `)
+  const { rows } = await pool.query(
+    'INSERT INTO notations (reservation_id, note, commentaire) VALUES ($1, $2, $3) RETURNING *',
+    [reservation_id, note, commentaire || '']
+  )
+  res.status(201).json(rows[0])
+})
+
+// Note moyenne
+app.get('/api/notations/moyenne', async (req, res) => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS notations (
+      id SERIAL PRIMARY KEY,
+      reservation_id INTEGER UNIQUE,
+      note INTEGER CHECK (note >= 1 AND note <= 5),
+      commentaire TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `)
+  const { rows } = await pool.query('SELECT AVG(note) as moyenne, COUNT(*) as total FROM notations')
+  res.json({
+    moyenne: parseFloat(rows[0].moyenne || 0).toFixed(1),
+    total: parseInt(rows[0].total)
+  })
+})
 app.listen(PORT, () => {
   console.log(`✅ Serveur CleanFix CI démarré sur http://localhost:${PORT}`)
 })
